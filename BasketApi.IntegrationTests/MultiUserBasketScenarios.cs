@@ -86,9 +86,8 @@ namespace BasketApi.IntegrationTests
 
 
             //User1 trying to retrieve URL belonging to User2 - should result in HTTP 403
-            var exc = Assert.ThrowsAsync<HttpRequestException>(() =>
+            Assert.ThrowsAsync<ResourceAccessNotPermittedException>(() =>
                 _client1.GetBasketItem(basketItemUrl2));
-            Assert.That(exc.Message.Contains("403"));
         }
 
         private async Task AuthenticateWithTwoNewUsers()

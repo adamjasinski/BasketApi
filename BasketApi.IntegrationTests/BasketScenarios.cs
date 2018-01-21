@@ -150,7 +150,7 @@ namespace BasketApi.IntegrationTests
         }
 
         [Test]
-        public async Task AddingMultipleItemsWithSameProductIdToBasket_CanRetrieve_AndQuantitiesShouldBeSummed()
+        public async Task AddingMultipleItemsWithSameProductIdToBasket_CanRetrieve_AndQuantitiesShouldBeAddedUp()
         {
             await AuthenticateWithNewUser();
 
@@ -199,9 +199,27 @@ namespace BasketApi.IntegrationTests
             var basketItemUrl = await _client.AddBasketItem(basket, basketItemToAdd);
             var basketItemToUpdate = new BasketItemUpdateModel {Quantity = 0};
 
-            var exc = Assert.ThrowsAsync<HttpRequestException>(() =>
+            var exc = Assert.ThrowsAsync<BadRequestException>(() =>
                 _client.UpdateBasketItem(basketItemUrl, basketItemToUpdate));
-            Assert.That(exc.Message.Contains("400"));
+            Assert.That(exc.Message.Contains("Quantity"));
+        }
+
+        [Test]
+        public async Task AddingAndDeletingSingleItemToBasket_AccessingDeletedItemShouldThrow()
+        {
+            await AuthenticateWithNewUser();
+
+            var basket = await _client.GetOwnBasket();
+            _fixture.Customize(new BasketItemForCreationCustomization());
+            var basketItemToAdd = _fixture.Create<BasketItemModel>();
+
+            var uri1 = await _client.AddBasketItem(basket, basketItemToAdd);
+            var retrievedItem1 = await _client.GetBasketItem(uri1);
+
+            await _client.DeleteBasketItem(retrievedItem1);
+
+            Assert.ThrowsAsync<ResourceNotFoundException>(() => 
+                _client.GetBasketItem(uri1));
         }
 
         private async Task AuthenticateWithNewUser()

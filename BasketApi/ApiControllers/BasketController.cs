@@ -64,7 +64,7 @@ namespace BasketApi.ApiControllers
                 {"self", CreateSelfLink(selfLink, "basket")},
                 {"items", new HalLink(new Uri(itemsLink, UriKind.RelativeOrAbsolute), "items")}
             };
-            EnrichAllBasketItemsWithLinksAndEmbeddedContent(userId, basketRepresentation.Items, false);
+            EnrichAllBasketItemsWithLinksAndEmbeddedContent(userId, basketRepresentation, true);
             return Ok(basketRepresentation);
         }
 
@@ -99,11 +99,12 @@ namespace BasketApi.ApiControllers
         {
             var basket = _basketService.GetBasket(userId);
 
-            var basketItems = basket.GetItems().ToArray();
-            var representations = _mapper.Map<BasketItemModel[]>(basketItems);
-            EnrichAllBasketItemsWithLinksAndEmbeddedContent(userId, representations, true);
+            //var basketItems = basket.GetItems().ToArray();
+            //var representations = _mapper.Map<BasketItemModel[]>(basketItems);
+            var basketRepresentation = _mapper.Map<BasketModel>(basket);
+            EnrichAllBasketItemsWithLinksAndEmbeddedContent(userId, basketRepresentation, true);
 
-            return Ok(representations);
+            return Ok(basketRepresentation.Items);
         }
 
         /// <summary>
@@ -181,6 +182,12 @@ namespace BasketApi.ApiControllers
             return new HalLink(new Uri(selfAction, UriKind.RelativeOrAbsolute), title);
         }
 
+        /// <summary>
+        /// Adds HAL links and (optionally) embedded content for related entities
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="basketItem"></param>
+        /// <param name="includeEmbeddedContent"></param>
         private void EnrichBasketItemWithLinksAndEmbeddedContent(Guid userId, BasketItemModel basketItem, bool includeEmbeddedContent=true)
         {
             var productId = basketItem.ProductId;
@@ -194,11 +201,23 @@ namespace BasketApi.ApiControllers
             }
         }
 
-        private void EnrichAllBasketItemsWithLinksAndEmbeddedContent(Guid userId, BasketItemModel[] basketItems, bool includeEmbeddedContent)
+        /// <summary>
+        /// Adds HAL links and (optionally) embedded content for related entities
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="basket"></param>
+        /// <param name="includeEmbeddedContent"></param>
+        private void EnrichAllBasketItemsWithLinksAndEmbeddedContent(Guid userId, BasketModel basket, bool includeEmbeddedContent)
         {
-            foreach (var item in basketItems)
+            foreach (var item in basket.Items)
             {
                 EnrichBasketItemWithLinksAndEmbeddedContent(userId, item, includeEmbeddedContent);
+            }
+
+            if (includeEmbeddedContent)
+            {
+                basket.TotalPrice = basket.Items.Sum(x => 
+                    x._embedded.ContainsKey("product") ? ((EmbeddedProduct) x._embedded["product"]).Price : 0);
             }
         }
     }

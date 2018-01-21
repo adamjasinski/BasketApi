@@ -20,24 +20,22 @@ namespace BasketApi.IntegrationTests
         [Test]
         public async Task ValidCredentials_ShouldRetrieveToken()
         {
-            await _client.Authorize( "adam", Constants.UniversalPassword);
+            await _client.Authorize("adam", Constants.UniversalPassword);
             Assert.IsTrue(_client.HasBearerToken);
         }
 
         [Test]
         public void InvalidCredentials_ShouldThrow()
         {
-            var exc = Assert.ThrowsAsync<HttpRequestException>(() => 
+            Assert.ThrowsAsync<UnauthorizedException>(() => 
                 _client.Authorize("otheruser", "unknown password"));
-            Assert.That(exc.Message.Contains("401"));
         }
 
         [Test]
         public void UnauthenticatedUserAccessingBasketApi_ShouldThrow()
         {
-            var exc = Assert.ThrowsAsync<HttpRequestException>(() => 
+            Assert.ThrowsAsync<UnauthorizedException>(() => 
                 _client.GetOwnBasket());
-            Assert.That(exc.Message.Contains("401"));
         }
 
         [TearDown]

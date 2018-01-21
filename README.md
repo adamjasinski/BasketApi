@@ -69,7 +69,19 @@ Response:
     "id": "cc1edc35-cbc1-40dd-abdb-73604dcc9fab",
     "items": [
         {
-            "_embedded": null,
+            "_embedded": {
+                "product": {
+                    "_links": {
+                        "self": {
+                            "href": "http://api.contoso.com/products/91a63109-17f6-48aa-b942-366022abaa8e",
+                            "title": "product"
+                        }
+                    },
+                    "productId": "91a63109-17f6-48aa-b942-366022abaa8e",
+                    "description": "Description of product 91a63109-17f6-48aa-b942-366022abaa8e",
+                    "productImageUrl": "http://contoso.com/products/assets/91a63109-17f6-48aa-b942-366022abaa8e.png",
+                    "price": 69.3242677810249
+                }
             "_links": {
                 "self": {
                     "href": "/api/users/cc1edc35-cbc1-40dd-abdb-73604dcc9fab/basket/items/61a63109-17f6-48aa-b942-366022abaa8d",
@@ -80,7 +92,7 @@ Response:
             "quantity": 3
         }
     ],
-    "expirationDate": "0001-01-01T00:00:00"
+    "totalPrice": 69.3242677810249
 }
 ```
 

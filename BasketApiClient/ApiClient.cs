@@ -172,6 +172,12 @@ namespace BasketApiClient
                     return;
                 case HttpStatusCode.NotFound:
                     throw new ResourceNotFoundException(responseMessage.RequestMessage.RequestUri);
+                case HttpStatusCode.Unauthorized:
+                    throw new UnauthorizedException();
+                case HttpStatusCode.Forbidden:
+                    throw new ResourceAccessNotPermittedException();
+                case HttpStatusCode.BadRequest:
+                    throw new BadRequestException(responseMessage.Content.ReadAsStringAsync().Result);
                 default:
                     responseMessage.EnsureSuccessStatusCode();
                     return;

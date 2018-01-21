@@ -14,7 +14,7 @@ namespace BasketApi.Contracts
 
         public BasketItemModel[] Items { get; set; } = new BasketItemModel[0];
 
-        public DateTime ExpirationDate { get; set; }
+        public decimal TotalPrice { get; set; }
     }
 
     /// <summary>
