@@ -64,10 +64,11 @@ namespace BasketApi.ApiControllers
                 {"self", CreateSelfLink(selfLink, "basket")},
                 {"items", new HalLink(new Uri(itemsLink, UriKind.RelativeOrAbsolute), "items")}
             };
+            EnrichAllBasketItemsWithLinksAndEmbeddedContent(userId, basketRepresentation.Items, false);
             return Ok(basketRepresentation);
         }
 
-
+       
         /// <summary>
         /// Retrieves basket item for a specific product.
         /// </summary>
@@ -99,9 +100,10 @@ namespace BasketApi.ApiControllers
             var basket = _basketService.GetBasket(userId);
 
             var basketItems = basket.GetItems().ToArray();
-            var representations = _mapper.Map<BasketItemModel[]>(basketItems)
-                .Select(item => EnrichBasketItemWithLinksAndEmbeddedContent(userId, item))
-                .ToArray();
+            var representations = _mapper.Map<BasketItemModel[]>(basketItems);
+            EnrichAllBasketItemsWithLinksAndEmbeddedContent(userId, representations, true);
+                //.Select(item => EnrichBasketItemWithLinksAndEmbeddedContent(userId, item))
+                //.ToArray();
 
             return Ok(representations);
         }
@@ -181,15 +183,26 @@ namespace BasketApi.ApiControllers
             return new HalLink(new Uri(selfAction, UriKind.RelativeOrAbsolute), title);
         }
 
-        private BasketItemModel EnrichBasketItemWithLinksAndEmbeddedContent(Guid userId, BasketItemModel basketItem)
+        private BasketItemModel EnrichBasketItemWithLinksAndEmbeddedContent(Guid userId, BasketItemModel basketItem, bool includeEmbeddedContent=true)
         {
             var productId = basketItem.ProductId;
             var selfLink = Url.Action("GetItem", "Basket", new { userId = userId, productId = productId });
             basketItem._links =
                 new Dictionary<string, HalLink> { { "self", CreateSelfLink(selfLink, "basket") } };
-            var productPreview = _productPreviewRepository.GetProductPreview(productId);
-            basketItem._embedded = new Dictionary<string, object> { { "product", productPreview } };
+            if (includeEmbeddedContent)
+            {
+                var productPreview = _productPreviewRepository.GetProductPreview(productId);
+                basketItem._embedded = new Dictionary<string, object> { { "product", productPreview } };
+            }
             return basketItem;
+        }
+
+        private void EnrichAllBasketItemsWithLinksAndEmbeddedContent(Guid userId, BasketItemModel[] basketItems, bool includeEmbeddedContent)
+        {
+            foreach (var item in basketItems)
+            {
+                EnrichBasketItemWithLinksAndEmbeddedContent(userId, item, includeEmbeddedContent);
+            }
         }
     }
 
