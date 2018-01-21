@@ -1,6 +1,7 @@
 # Basket Web API Demo
 
 [![N|NetCore](http://dotnetcore.io/wp-content/uploads/2017/01/DNC-Logo-300x226.png)](https://docs.microsoft.com/en-us/aspnet/core/)
+
 Basket Web API is a demo of a RESTful API for managing shopping cart contents, written in C#/ASP .NET Core.
 It uses [HAL](http://stateless.co/hal_specification.html) (Hypertext Application Language) convention for representing resources and links, making it easier to navigate to related resources.
 
@@ -12,6 +13,7 @@ It uses [HAL](http://stateless.co/hal_specification.html) (Hypertext Application
 - Update item quantity in the basket
 - Remove an item from the basket
 - Remove all items from the basket
+- Resource access authorization - a user can't access baskets of other users
 
 ## Assumptions:
 - Basket operations for unauthenticated users aren't supported
@@ -31,7 +33,7 @@ It uses [HAL](http://stateless.co/hal_specification.html) (Hypertext Application
 Users need to authenticate with the Token endpoint.
 Any username is accepted by the token endpoint, as long as the password is ``demo``.
 
-#### HTTP
+#### With HTTP
 POST http://localhost:56128/api/token
 Content-Type: application/json
 ``{ "username": "someuser", "password": "demo}``
@@ -40,14 +42,13 @@ Response:
 ``<JWT token content>``
 or HTTP 401 if authentication wasn't successful.
 
-#### BasketApiClient
+#### With BasketApiClient
 ```C#
 _client.Authorize("someuser", "password")
 ```
 Successful authentication stores the JWT token in client HTTP headers
 
-# Basket operations
-## HTTP
+# Basket operations - HTTP API reference
 ### Get basket for current user
 Retrieves basket contents for currently authenticated user.
 GET http://localhost:56128/api/my/basket
@@ -227,7 +228,7 @@ Authorization: Bearer <JWT token>
 Response:
 HTTP 200
 
-# BasketApiClient
+# Basket operations - BasketApiClient reference
 BasketApiClient is a .NET library, which can be used for calling Basket Web API.
 
 ## Authentication
@@ -268,6 +269,5 @@ Basket obtained from GetOwnBasket method is needed to delete all items from the 
 await _client.ClearBasket(basket);
 ```
 
-## Appendix
-A collection of Postman requests - can be used for testing locally:
-https://www.getpostman.com/collections/3069849a02c14d17f89b
+# See also
+- A collection of [Postman requests](https://www.getpostman.com/collections/3069849a02c14d17f89b) for Basket API - can be used for testing locally
