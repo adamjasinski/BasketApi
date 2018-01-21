@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using AutoFixture;
 using BasketApi.Contracts;
@@ -142,10 +143,9 @@ namespace BasketApi.IntegrationTests
             await _client.AddBasketItem(basket, basketItemsToAdd[0]);
             await _client.AddBasketItem(basket, basketItemsToAdd[1]);
 
-            basket = await _client.ClearBasket(basket);
-            Assert.AreEqual(0, basket.Items.Length);
-            //And re-read again
-            basket = await _client.ClearBasket(basket);
+            await _client.ClearBasket(basket);
+            //And re-read the basket
+            basket = await _client.GetOwnBasket();
             Assert.AreEqual(0, basket.Items.Length);
         }
 
@@ -185,6 +185,23 @@ namespace BasketApi.IntegrationTests
             var retrievedBasketItem = await _client.GetBasketItem(basketItemUrl);
 
             Assert.AreEqual(basketItemToUpdate.Quantity, retrievedBasketItem.Quantity);
+        }
+
+        [Test]
+        public async Task AddingNewItemToBasket_AndUpdatingWithInvalidQuantity_ShouldThrow()
+        {
+            await AuthenticateWithNewUser();
+
+            var basket = await _client.GetOwnBasket();
+            _fixture.Customize(new BasketItemForCreationCustomization());
+            var basketItemToAdd = _fixture.Create<BasketItemModel>();
+
+            var basketItemUrl = await _client.AddBasketItem(basket, basketItemToAdd);
+            var basketItemToUpdate = new BasketItemUpdateModel {Quantity = 0};
+
+            var exc = Assert.ThrowsAsync<HttpRequestException>(() =>
+                _client.UpdateBasketItem(basketItemUrl, basketItemToUpdate));
+            Assert.That(exc.Message.Contains("400"));
         }
 
         private async Task AuthenticateWithNewUser()

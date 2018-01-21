@@ -18,16 +18,16 @@ namespace BasketApi.ApiControllers
     public class BasketController : Controller
     {
         private readonly BasketService _basketService;
-        private readonly IProductPreviewReadOnlyRepository _productPreviewRepository;
+        private readonly IProductReadOnlyRepository _productRepository;
         private readonly IMapper _mapper;
 
         public BasketController(
             BasketService basketService, 
-            IProductPreviewReadOnlyRepository productPreviewRepository, 
+            IProductReadOnlyRepository productRepository, 
             IMapper mapper)
         {
             _basketService = basketService;
-            _productPreviewRepository = productPreviewRepository;
+            _productRepository = productRepository;
             _mapper = mapper;
         }
 
@@ -102,8 +102,6 @@ namespace BasketApi.ApiControllers
             var basketItems = basket.GetItems().ToArray();
             var representations = _mapper.Map<BasketItemModel[]>(basketItems);
             EnrichAllBasketItemsWithLinksAndEmbeddedContent(userId, representations, true);
-                //.Select(item => EnrichBasketItemWithLinksAndEmbeddedContent(userId, item))
-                //.ToArray();
 
             return Ok(representations);
         }
@@ -149,7 +147,7 @@ namespace BasketApi.ApiControllers
             {
                 return NotFound();
             }
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -163,7 +161,7 @@ namespace BasketApi.ApiControllers
         {
             if (!_basketService.DeleteBasketItem(userId, productId))
                 return NotFound();
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -175,7 +173,7 @@ namespace BasketApi.ApiControllers
         public IActionResult DeleteItems(Guid userId)
         {
             _basketService.ClearBasket(userId);
-            return Ok();
+            return NoContent();
         }
 
         private static HalLink CreateSelfLink(string selfAction, string title)
@@ -183,7 +181,7 @@ namespace BasketApi.ApiControllers
             return new HalLink(new Uri(selfAction, UriKind.RelativeOrAbsolute), title);
         }
 
-        private BasketItemModel EnrichBasketItemWithLinksAndEmbeddedContent(Guid userId, BasketItemModel basketItem, bool includeEmbeddedContent=true)
+        private void EnrichBasketItemWithLinksAndEmbeddedContent(Guid userId, BasketItemModel basketItem, bool includeEmbeddedContent=true)
         {
             var productId = basketItem.ProductId;
             var selfLink = Url.Action("GetItem", "Basket", new { userId = userId, productId = productId });
@@ -191,10 +189,9 @@ namespace BasketApi.ApiControllers
                 new Dictionary<string, HalLink> { { "self", CreateSelfLink(selfLink, "basket") } };
             if (includeEmbeddedContent)
             {
-                var productPreview = _productPreviewRepository.GetProductPreview(productId);
+                var productPreview = _productRepository.GetProductPreview(productId);
                 basketItem._embedded = new Dictionary<string, object> { { "product", productPreview } };
             }
-            return basketItem;
         }
 
         private void EnrichAllBasketItemsWithLinksAndEmbeddedContent(Guid userId, BasketItemModel[] basketItems, bool includeEmbeddedContent)

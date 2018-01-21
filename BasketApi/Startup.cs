@@ -24,7 +24,7 @@ namespace BasketApi
             services.AddMvc();
             services.AddTransient<BasketService>();
             services.AddSingleton<IBasketRepository, InMemoryBasketRepository>();
-            services.AddSingleton<IProductPreviewReadOnlyRepository, ProductPreviewReadOnlyStubRepository>();
+            services.AddSingleton<IProductReadOnlyRepository, ProductReadOnlyStubRepository>();
             services.AddSingleton<IAuthenticationService, AuthenticationServiceStub>();
             services.AddSingleton<IMapper>(AutoMapperConfig.InitializeMapper());
 

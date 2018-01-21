@@ -3,7 +3,7 @@ using BasketApi.Contracts;
 
 namespace BasketApi.Domain
 {
-    public interface IProductPreviewReadOnlyRepository
+    public interface IProductReadOnlyRepository
     {
         EmbeddedProduct GetProductPreview(Guid productId);
     }

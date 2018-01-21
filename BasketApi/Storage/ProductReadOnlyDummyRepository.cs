@@ -6,11 +6,11 @@ using BasketApi.Contracts.Hal;
 
 namespace BasketApi.Storage
 {
-    public class ProductPreviewReadOnlyStubRepository : IProductPreviewReadOnlyRepository
+    public class ProductReadOnlyStubRepository : IProductReadOnlyRepository
     {
-        private Random _random;
+        private readonly Random _random;
 
-        public ProductPreviewReadOnlyStubRepository()
+        public ProductReadOnlyStubRepository()
         {
             _random = new Random();
         }

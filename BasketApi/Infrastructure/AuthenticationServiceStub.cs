@@ -21,7 +21,6 @@ namespace BasketApi.Infrastructure
         /// </summary>
         private readonly ConcurrentDictionary<string, Guid> _userCache = new ConcurrentDictionary<string, Guid>();
 
-
         public bool Authenticate(string username, string password, out List<Claim> claims)
         {
             claims = null;

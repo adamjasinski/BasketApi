@@ -22,6 +22,10 @@ namespace BasketApiClient
 
         public bool HasBearerToken { get; private set; }
 
+        /// <summary>
+        /// Creates and instance of the API client
+        /// </summary>
+        /// <param name="baseUri">The base URL of the API (i.e. the scheme://host:port segment)</param>
         public ApiClient(Uri baseUri)
         {
             _httpClient = new HttpClient {BaseAddress = baseUri};
@@ -61,12 +65,6 @@ namespace BasketApiClient
         }
 
 
-        //public async Task<BasketItemModel[]> GetBasketItems(Guid userId)
-        //{
-        //    //_httpClient.GetAsync(""
-        //    throw new NotImplementedException();
-        //}
-
         /// <summary>
         /// Adds an item to a previously retrieved basket.
         /// </summary>
@@ -75,7 +73,7 @@ namespace BasketApiClient
         /// <returns>URL of the created item</returns>
         public async Task<Uri> AddBasketItem(BasketModel basket, BasketItemModel basketItem)
         {
-            var url = ExtractLinkOrThrow(basket, "items");
+            var url = basket.ExtractLink("items");
             return await AddBasketItem(url, basketItem);
         }
 
@@ -92,12 +90,6 @@ namespace BasketApiClient
             ProcessStandardStatusCodes(response);
             return response.Headers.Location;
         }
-
-        //public async Task<Uri> AddBasketItem(Guid userId, BasketItemModel basketItem)
-        //{
-        //    var relativeUri = new Uri($"/users/{userId}/basket/items", UriKind.Relative);
-        //    return await AddBasketItem(relativeUri, basketItem);
-        //}
 
         /// <summary>
         /// Retrieves a specific basket item.
@@ -126,34 +118,6 @@ namespace BasketApiClient
             ProcessStandardStatusCodes(response);
         }
 
-        ///// <summary>
-        ///// Updates a basket item, indicated by .
-        ///// </summary>
-        ///// <param name="basketItemUrl">URL of the basket item</param>
-        ///// <param name="basketItem">Data, with which the basket item should be updated</param>
-        ///// <returns></returns>
-        //public async Task UpdateBasketItem(BasketItemModel basketItem)
-        //{
-        //    var url = ExtractSelfLinkOrThrow(basketItem);
-        //    var basketItemUpdateModel = new BasketItemUpdateModel { Quantity = basketItem.Quantity };
-        //    await UpdateBasketItem(url, basketItemUpdateModel);
-        //}
-
-        private static Uri ExtractSelfLinkOrThrow(HalLinkAwareContract contract)
-        {
-            return ExtractLinkOrThrow(contract, "self");
-        }
-
-        private static Uri ExtractLinkOrThrow(HalLinkAwareContract contract, string linkTitle)
-        {
-            if (!contract._links.TryGetValue(linkTitle, out var halLink) || halLink.Href == null)
-                throw new ArgumentException(
-                    $"This payload was expected to contain a {linkTitle} link: {contract.GetType().Name}. Please ensure that you retrieved it from the API",
-                    nameof(contract));
-
-            return halLink.Href;
-        }
-
         /// <summary>
         /// Deletes a basket item, identified by its URL.
         /// </summary>
@@ -172,26 +136,19 @@ namespace BasketApiClient
         /// <returns></returns>
         public async Task DeleteBasketItem(BasketItemModel basketItem)
         {
-            var url = ExtractSelfLinkOrThrow(basketItem);
+            var url = basketItem.ExtractSelfLink();
             await DeleteBasketItem(url);
         }
-
-        //public async Task DeleteBasketItem(Guid userId, Guid productId)
-        //{
-        //    var url = new Uri($"/users/{userId}/basket/items/{productId}", UriKind.RelativeOrAbsolute);
-        //    await DeleteBasketItem(url);
-        //}
 
         /// <summary>
         /// Clears the basket - deletes all items.
         /// </summary>
         /// <param name="basket">Previously retrieved basket</param>
-        /// <returns>Cleared basket (containing no items)</returns>
-        public async Task<BasketModel> ClearBasket(BasketModel basket)
+        /// <returns>Refreshed basket (containing no items)</returns>
+        public async Task ClearBasket(BasketModel basket)
         {
-            var url = ExtractLinkOrThrow(basket, "items");
+            var url = basket.ExtractLink("items");
             await ClearBasket(url);
-            return await GetOwnBasket();
         }
 
         /// <summary>
@@ -204,18 +161,13 @@ namespace BasketApiClient
             await _httpClient.DeleteAsync(itemsUrl);
         }
 
-        //public async Task ClearBasket(Guid userId)
-        //{
-        //    var url = new Uri($"/users/{userId}/basket/items", UriKind.RelativeOrAbsolute);
-        //    await ClearBasket(url);
-        //}
-
         private void ProcessStandardStatusCodes(HttpResponseMessage responseMessage)
         {
             switch (responseMessage.StatusCode)
             {
                 case HttpStatusCode.Accepted:
                 case HttpStatusCode.Created:
+                case HttpStatusCode.NoContent:
                 case HttpStatusCode.OK:
                     return;
                 case HttpStatusCode.NotFound:
@@ -232,6 +184,9 @@ namespace BasketApiClient
         }
 
 
+        /// <summary>
+        /// Disposes of the API client.
+        /// </summary>
         public void Dispose()
         {
             _httpClient.Dispose();

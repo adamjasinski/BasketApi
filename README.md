@@ -229,30 +229,32 @@ Successful authentication stores the JWT token in client HTTP headers
 ```C#
 var basket = client.GetOwnBasket();
 ```
+Note: Each basket item has a URL to itself that can be used to perform some of the operations below. The basket item link can be obtained as follows:
+``var basketItemUrl = basket.Items[0].ExtractSelfLink();``
 
 ## Add basket item
-Basket obtained in the previous step is needed to add an item:
+Basket obtained from GetOwnBasket method is needed to delete all items from the basket:
 ```C#
 var basketItemUrl = await _client.AddBasketItem(basket, basketItemToAdd);
 ```
+
 ## Update basket item
-URL obtained in the previous step can be used to update an item:
+URL obtained from the AddBasketItem method can be used to update an item:
 ```C#
 await _client.UpdateBasketItem(basketItemUrl, basketItemToUpdate);
 ```
 
 ## Delete basket item
-URL obtained in the previous step can be used to update an item:
+URL obtained from the AddBasketItem method can be used to update an item:
 ```C#
 await _client.DeleteBasketItem(basketItemUrl);
 ```
 
 ## Delete all basket items
-Basket obtained in the previous step is needed to delete all items from the basket:
+Basket obtained from GetOwnBasket method is needed to delete all items from the basket:
 ```C#
 await _client.ClearBasket(basket);
 ```
-Note: after clearing the basket, the client re-reads its contents from the API.
 
 ## Appendix
 A collection of Postman requests - can be used for testing locally:

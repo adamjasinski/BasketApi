@@ -2,6 +2,9 @@
 
 namespace BasketApi.Domain
 {
+    /// <summary>
+    /// Service implementing business logic of basket operations.
+    /// </summary>
     public class BasketService
     {
         private readonly IBasketRepository _basketRepository;

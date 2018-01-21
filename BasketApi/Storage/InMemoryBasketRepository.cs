@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using BasketApi.Domain;
-using BasketApi.Modules;
 
 namespace BasketApi.Storage
 {
@@ -25,7 +23,6 @@ namespace BasketApi.Storage
 
         public Basket Get(Guid id)
         {
-            //TODO - clone the value
             return _baskets.TryGetValue(id, out var basket) ? basket : null;
         }
 
@@ -36,35 +33,14 @@ namespace BasketApi.Storage
             {
                 throw new InvalidOperationException("Update error: basket key doesn't exist");
             }
-            //Note: TryUpdate will compare the ID and ModifiedDate
-            if (!_baskets.TryUpdate(basket.Id, basket, currentBasket))
-            {
-                throw new BasketOptimisticConcurrencyException();
-            }
+
+            // Note: there's no concurrency control here for updates for the same key 
+            // (i.e. if the same user sends several requests at the same time, the last one wins).
+            // In order to implement optimistic concurrency (i.e. 'first one wins'), 
+            // we'd have to use ETags/LastModifiedDate and If-Matches/If-Unmodified-Since in the API controller,
+            // and respond with HTTP 409 (Conflict) if an update conflict was detected.
+            _baskets[basket.Id] = basket;
+           
         }
     }
-
-    //class BasketEqualityComparer : IEqualityComparer<Basket>
-    //{
-    //    public bool Equals(Basket x, Basket y)
-    //    {
-    //        if (object.ReferenceEquals(x, y))
-    //            return true;
-
-    //        if (x == null || y == null)
-    //            return false;
-
-    //        return x.Id.Equals(y.Id) && x.ModifiedDate.Equals(y.ModifiedDate);
-    //    }
-
-    //    public int GetHashCode(Basket obj)
-    //    {
-    //        if (obj == null)
-    //        {
-    //            return 0;
-    //        }
-
-    //        return obj.Id.GetHashCode();
-    //    }
-    //}
 }

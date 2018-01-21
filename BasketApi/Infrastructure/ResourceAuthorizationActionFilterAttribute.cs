@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace BasketApi.Infrastructure
 {
@@ -22,10 +21,6 @@ namespace BasketApi.Infrastructure
                 return;
 
             var requestedResourceUserId = userSegmentMatch.Groups.Last().Value;
-
-            //var queryStrings = QueryHelpers.ParseQuery(context.HttpContext.Request.QueryString.Value);
-            //if (!queryStrings.TryGetValue("userId", out var requestedResourceUserId))
-            //    return;
 
             var authenticatedUserId = ApiClaimHelper.ExtractUserIdClaim(context.HttpContext.User.Claims);
             if(authenticatedUserId == null)

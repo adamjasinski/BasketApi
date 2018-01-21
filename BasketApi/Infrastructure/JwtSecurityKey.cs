@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace BasketApi
+namespace BasketApi.Infrastructure
 {
     public static class JwtSecurityKey
     {

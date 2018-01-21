@@ -59,44 +59,5 @@ namespace BasketApi.Domain
             existingItem.SetQuantity(newQuantity);
             return true;
         }
-
-        //TODO - this should be persistence property only
-        public DateTime ModifiedDate { get; set; }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Basket other))
-                return false;
-
-            return other.Id == Id && other.ModifiedDate == ModifiedDate;
-        }
-
-        public override int GetHashCode()
-        {
-            return Id.GetHashCode();
-        }
-    }
-
-    public class BasketItem
-    {
-        public Guid ProductId { get; }
-
-        public int Quantity { get; private set; }
-
-        public BasketItem(Guid productId, int quantity)
-        {
-            ProductId = productId;
-            Quantity = quantity;
-        }
-
-        public void AddQuantity(int quantityDiff)
-        {
-            Quantity += quantityDiff;
-        }
-
-        public void SetQuantity(int newQuantity)
-        {
-            Quantity = newQuantity;
-        }
     }
 }
